@@ -1,4 +1,4 @@
-# Serving and Managing ML models with Mlflow and Triton Inference Server  
+# Serving and Managing ML models with Mlflow and Nvidia Triton Inference Server  
 
 ## Lets get brief familiarity with Mlflow, what it is and what it offers.
 **Introduction:**
