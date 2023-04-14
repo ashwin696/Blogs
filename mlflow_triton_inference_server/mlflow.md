@@ -247,7 +247,7 @@ results.get_response()
 
  There are several advantages of using both mlflow and triton Inference server together:
    
-We can utilize the inferecning power of Triton i.e.   
+We can utilize the inferencing power of Triton i.e.   
 
 - Multi backend/arch supported inferencing.  
 - Complete and optimized utilization of CPU/GPU resources.  
