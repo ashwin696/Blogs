@@ -1,6 +1,6 @@
-# Mlflow with Triton Inference Server  
+# Serving and Managing ML models with Mlflow and Triton Inference Server  
 
-## Lets start with Mlflow
+## Lets get brief familiarity with Mlflow, what it is and what it offers.
 **Introduction:**
 
 MLflow is an open source platform for managing the end-to-end machine learning lifecycle. It tackles four primary functions:
@@ -59,94 +59,6 @@ For Other Types of Tracking methods [check here](<https://mlflow.org/docs/latest
 
 [`mlflow.log_metric()`](<https://mlflow.org/docs/latest/python_api/mlflow.html#mlflow.log_metric>) logs a single key-value metric. The value must always be a number. MLflow remembers the history of values for each metric. Use [`mlflow.log_metrics()`](<https://mlflow.org/docs/latest/python_api/mlflow.html#mlflow.log_metrics>) to log multiple metrics at once.
 
-Example to use the above functions:
-
-<!-- Mlflow tracking for a Linear Regression model: -->
-
-<!-- ```python
-import os
-import warnings
-import sys
-
-import pandas as pd
-import numpy as np
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import ElasticNet
-from urllib.parse import urlparse
-import mlflow
-import mlflow.sklearn
-
-import logging
-
-logging.basicConfig(level=logging.WARN)
-logger = logging.getLogger(__name__)
-
-
-def eval_metrics(actual, pred):
-    rmse = np.sqrt(mean_squared_error(actual, pred))
-    mae = mean_absolute_error(actual, pred)
-    r2 = r2_score(actual, pred)
-    return rmse, mae, r2
-
-
-if __name__ == "__main__":
-    warnings.filterwarnings("ignore")
-    np.random.seed(40)
-
-    # Read the wine-quality csv file from the URL
-    csv_url = (
-        "http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
-    )
-    try:
-        data = pd.read_csv(csv_url, sep=";")
-    except Exception as e:
-        logger.exception(
-            "Unable to download training & test CSV, check your internet connection. Error: %s", e
-        )
-
-    # Split the data into training and test sets. (0.75, 0.25) split.
-    train, test = train_test_split(data)
-
-    # The predicted column is "quality" which is a scalar from [3, 9]
-    train_x = train.drop(["quality"], axis=1)
-    test_x = test.drop(["quality"], axis=1)
-    train_y = train[["quality"]]
-    test_y = test[["quality"]]
-
-    alpha = float(sys.argv[1]) if len(sys.argv) > 1 else 0.5
-    l1_ratio = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
-
-    with mlflow.start_run(): # Initiate mlflow tracking
-        lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42)
-        lr.fit(train_x, train_y)
-
-        predicted_qualities = lr.predict(test_x)
-
-        (rmse, mae, r2) = eval_metrics(test_y, predicted_qualities)
-
-        print("Elasticnet model (alpha=%f, l1_ratio=%f):" % (alpha, l1_ratio))
-
-        mlflow.log_param("alpha", alpha)
-        mlflow.log_param("l1_ratio", l1_ratio)
-        mlflow.log_metric("rmse", rmse)
-        mlflow.log_metric("r2", r2)
-        mlflow.log_metric("mae", mae)
-
-        tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
-
-        # Model registry does not work with file store
-        if tracking_url_type_store != "file":
-
-            # Register the model
-            # There are other ways to use the Model Registry, which depends on the use case,
-            # please refer to the doc for more information:
-            # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-            mlflow.sklearn.log_model(lr, "model", registered_model_name="ElasticnetWineModel")
-        else:
-            mlflow.sklearn.log_model(lr, "model")
-``` -->
-
 View the dashboard at [http://localhost:5000](<http://localhost:5000>) where the mlflow server is running.
 
 ![Backend SQlite](imgs/mlflow_dash.png "Backend SQlite")
@@ -184,17 +96,17 @@ with mlflow.start_run(run_name="YOUR_RUN_NAME") as run:
 More features like Fetching Serving, Renaming etc. [https://mlflow.org/docs/latest/model-registry.html#id6](<https://mlflow.org/docs/latest/model-registry.html#id6>)  
 
 
-# Triton Inference Server
+# Now lets see what Triton Inference Server is,
 
-<strong>Serving with Triton Inference Server:</strong>
+<b>Introduction</b>:
+
+NVIDIA Triton Inference Server is an open source inference serving software that streamlines AI inferencing. Triton enables teams to deploy any AI model from multiple deep learning and machine learning frameworks, including TensorRT, TensorFlow, PyTorch, ONNX, OpenVINO, Python, RAPIDS FIL, and more.   
+Triton supports inference across cloud, data center,edge and embedded devices on NVIDIA GPUs, x86 and ARM CPU, or AWS Inferentia.
+
+### <strong>Serving with Triton Inference Server with mlflow:</strong>  
 
 For serving models with Triton inference Server, Nvidia provides Mlflow Triton Plugin.
 
-[https://github.com/triton-inference-server/server/tree/r22.09/deploy/mlflow-triton-plugin](<https://github.com/triton-inference-server/server/tree/r22.09/deploy/mlflow-triton-plugin>)
-
-[https://catalog.ngc.nvidia.com/orgs/nvidia/teams/morpheus/containers/mlflow-triton-plugin](<https://catalog.ngc.nvidia.com/orgs/nvidia/teams/morpheus/containers/mlflow-triton-plugin>)
-
-[https://github.com/nv-morpheus/Morpheus/tree/bc791eaec7ffa19db2fd292f8fb65a74473885a2/models/mlflow](<https://github.com/nv-morpheus/Morpheus/tree/bc791eaec7ffa19db2fd292f8fb65a74473885a2/models/mlflow>)
 
 Currently it supports onnx and triton model flavours.
 
@@ -222,9 +134,7 @@ docker run --gpus=1 --rm -p8000:8000 -p8001:8001 -p8002:8002 -v/home/ubuntu/trit
 
 **Mlfow Triton Plugin**:
 
-Create a folder in the machine with name <u>triton_models</u>
-
- and copy your models to this folder with model structure as required by Triton Server
+Create a folder in the machine with name <u>triton_models</u> and copy your models to this folder with model structure as required by Triton Server
 
 **Model Structure for Inferencing:**
 
@@ -255,7 +165,7 @@ docker run -it -v /home/ubuntu/triton_models:/triton_models \
 --rm \
 -d nvcr.io/nvidia/morpheus/mlflow-triton-plugin:2.2.2
 
-docker exec -it <container_name> 
+docker exec -it <container_name> bash
 ```
 
 Export the Mlflow tracking server url and start the server: 
@@ -273,7 +183,7 @@ python publish_model_to_mlflow.py --model_name yolov6n  --model_directory /trito
 ![Model Dashboard](imgs/mlflow_models.png "Model Dashboard")
 
 
-Create Deployments the models to Triton Inference Server:
+Create Deployments to Triton Inference Server:
 
 ```bash
 mlflow deployments create -t triton --flavor triton --name yolov6n -m models:/yolov6n/1
@@ -296,10 +206,10 @@ mlflow deployments predict -t triton --name yolov6n --input-path <path-to-the-ex
 
 #Example input json for yolov6n:
 #img_ex is list of ndarray
-{"inputs":[{"name":"images","datatype":"FP32","shape":[1, 3, 640, 640],"data":'f'{img_ex}'"}]}
+{"inputs":[{"name":"images","datatype":"FP32","shape":[1, 3, 640, 640],"data":"example_image_array"}]}
 ```
 
-### 2 ) Perform inference with triton http client:  
+### 2 ) Perform inference with triton http/gRPC client:  
 
 ```python
 import tritonclient.http as httpclient
@@ -333,12 +243,29 @@ results.get_response()
    'shape': [1, 8400, 85],
    'parameters': {'binary_data_size': 2856000}}]}  
 
+## <b><u>Conclusion</b></u>:  
+
+ There are several advantages of using both mlflow and triton Inference server together:
+   
+We can utilize the inferecning power of Triton i.e.   
+
+- Multi backend/arch supported inferencing.  
+- Complete and optimized utilization of CPU/GPU resources.  
+- Multi protocol support gRPC/Http  
+
+And we have advantages of using mlflow as the frontend for Model Deployments and Model management,  
+ 
+- Mlflow is lightweight and fully featured MLOps toolkit with tons of API's.  
+- A centralized model store with UI to collaboratively manage the full lifecycle of ML Models.  
+- Model Tracking throughout development and Deployment with experiments using an interactive UI.  
 
 
-<b>References</b>:  
+### <b>References</b>:  
 https://github.com/mlflow/mlflow  
 https://github.com/triton-inference-server  
 https://github.com/triton-inference-server/client  
+https://catalog.ngc.nvidia.com/orgs/nvidia/teams/morpheus/containers/mlflow-triton-plugin  
+https://github.com/triton-inference-server/server/tree/r22.09/deploy/mlflow-triton-plugin
 https://catalog.ngc.nvidia.com/orgs/nvidia/teams/morpheus/containers/mlflow-triton-plugin
----
+https://github.com/nv-morpheus/Morpheus/tree/bc791eaec7ffa19db2fd292f8fb65a74473885a2/models/mlflow
 
